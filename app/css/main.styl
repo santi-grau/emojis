@@ -1,0 +1,23 @@
+columns = 3
+gutterSize = 16px
+
+html, body
+	width 100%
+	height 100%
+	padding 0
+	margin 0
+	background #efefef
+	#main
+		padding-bottom gutterSize
+		&:after
+			content ''
+			clear both
+			display block
+		.square
+			background #ffffff
+			width "calc((100vw - %s) / %s - %s )" % (gutterSize columns gutterSize)
+			height "calc((100vw - %s) / %s - %s )" % (gutterSize columns gutterSize)
+			float left
+			position relative
+			margin-left gutterSize
+			margin-top gutterSize
