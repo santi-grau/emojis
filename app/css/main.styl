@@ -1,5 +1,5 @@
 columns = 3
-gutterSize = 16px
+gutterSize = 2px
 
 html, body
 	width 100%
@@ -21,3 +21,13 @@ html, body
 			position relative
 			margin-left gutterSize
 			margin-top gutterSize
+			svg
+				z-index 1
+				position relative
+			canvas
+				z-index 0
+				position absolute
+				top 0
+				left 0
+				width 100% !important
+				height 100% !important

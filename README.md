@@ -1,4 +1,2 @@
-curl noise
+PINMOJIS
 =======
-
-- Use of kabibo curl noise

@@ -1,86 +1,50 @@
 window.SimplexNoise = require('simplex-noise');
+window.TweenMax = require('gsap');
+window.Matter = require('matter-js');
 
-var svgData = require('./../icons/icons.json');
+var icons = require('./../icons/icons.svg');
 
-var Sun = require('./icons/sun');
-var Eye = require('./icons/eye');
-var Travel = require('./icons/travel');
-var Cloud = require('./icons/cloud');
-
-var icons = {
-	'sun' : new Sun(),
-	'eye' : new Eye(),
-	'travel' : new Travel(),
-	'cloud' : new Cloud()
+var iconData = {
+	pin : require('./icons/pin'),
+	good : require('./icons/good'),
+	storm : require('./icons/storm'),
+	ok : require('./icons/ok'),
+	love : require('./icons/love'),
+	orbit : require('./icons/orbit'),
+	find : require('./icons/find'),
+	light : require('./icons/light'),
+	simmer : require('./icons/simmer'),
+	point : require('./icons/point'),
+	direction : require('./icons/direction'),
+	nice : require('./icons/nice')
 };
 
-var elems = document.getElementsByClassName('content');
-for (var icon in icons) {
-	var parser = new DOMParser();
-	var svg = parser.parseFromString( svgData[icon], "image/svg+xml");
-
-	var main = document.getElementById('main');
-
-	var square = document.createElement('div');
-	square.setAttribute('class', 'square');
-	main.appendChild( square );
-
-	// var content = document.createElement('div');
-	// content.setAttribute('class', 'content');
-	// square.appendChild( content );
-
-	var iconData = svgData[icon];
-	var parser = new DOMParser();
-	var doc = parser.parseFromString(iconData, "image/svg+xml");
-	var iconWidth = parseInt( doc.childNodes[0].getAttribute('width') );
-
-	var params = { width: iconWidth, height: iconWidth, autostart : true };
-	var two = new Two( params ).appendTo( square );
-
-	two.renderer.domElement.style['transform'] = 'scale(' + square.offsetWidth / iconWidth + ')';
-	two.renderer.domElement.style['transformOrigin'] = '0 0';
-
-
-	// var iconDimensions = { width : parseInt( doc.childNodes[0].getAttribute('width') ), height : parseInt( doc.childNodes[0].getAttribute('height') ) };
-	var i = two.interpret(doc.childNodes[0]);
-
-	i.fill = '#99999A'
-
-	if( icons[icon].init ) icons[icon].init( two );
-
-} 
-
-
-
-// console.log(doc.childNodes[0].getAttribute('width'));
-
-
-
-// console.log(i);
-
-// i.translation = new Two.Vector(elem.offsetWidth / 2,elem.offsetHeight/2);
-
-// i.center();
-
-// two.update();
-
-// var vertices = i.children[0].children[0].children[0].vertices;
-
-
-// for( var i = 0 ; i < vertices.length ; i++ ){
-// 	vertices[i].ox = vertices[ i ].x;
-// 	vertices[i].oy = vertices[ i ].y;
-// 	vertices[i].a = Math.atan2( vertices[ i ].y - iconDimensions.height / 2, vertices[ i ].x - iconDimensions.width / 2);
-// 	vertices[i].d = Math.sqrt( Math.pow( vertices[ i ].x - iconDimensions.width / 2, 2 ) + Math.pow( vertices[ i ].y - iconDimensions.height / 2, 2 ) );
-// }
-
+String.prototype.decodeEscapeSequence = function() {
+	return this.replace(/_x([0-9A-Fa-f]{2}_)/g, function() { return String.fromCharCode(parseInt(arguments[1], 16)); });
+};
 
 var App = function() {
 
 	window.onresize = this.onResize.bind( this );
-	this.inc = 0;
 	
+	this.element = document.getElementById('main');
 
+	var parser = new DOMParser();
+	var svgDoc = parser.parseFromString( icons, "image/svg+xml");
+	var svg = svgDoc.getElementsByTagName('svg')[0];
+	
+	this.size = { width : parseInt( svg.getAttribute('width') ), height : parseInt( svg.getAttribute('height') ) };
+	
+	var groups = svgDoc.getElementsByTagName('g');
+
+	this.icons = [];
+
+	for( var i = 0 ; i < groups.length ; i++ ){
+		var idData = groups[i].getAttribute('id');
+		var id = idData.split('.')[0].decodeEscapeSequence();
+		var name = idData.split('.')[1].decodeEscapeSequence().toLowerCase();
+		if( iconData[name] ) this.icons.push( new iconData[name]( this, id, groups[i] ) );
+	}
 
 	this.onResize();
 	
@@ -88,27 +52,12 @@ var App = function() {
 }
 
 App.prototype.onResize = function(e) {
-	// var multiSample = 2;
-	// this.renderer.setSize( this.containerEl.offsetWidth * multiSample, this.containerEl.offsetHeight * multiSample );
-	// this.renderer.domElement.setAttribute( 'style', 'width:' + this.containerEl.offsetWidth + 'px; height:' + this.containerEl.offsetHeight + 'px' );
+	
 }
 
 App.prototype.step = function( time ) {
 	window.requestAnimationFrame( this.step.bind( this ) );
-
-	for (var icon in icons) {
-		if( icons[icon].step ) icons[icon].step( time );
-	}
-	// this.inc += 0.01;
-
-	// for( var i = 0 ; i < vertices.length ; i++ ){
-	// 	var n = this.noise.noise2D( vertices[i].ox + this.inc, vertices[i].oy );
-	// 	vertices[i].set( vertices[i].ox + Math.cos( vertices[i].a ) * n * 3, vertices[i].oy + Math.sin( vertices[i].a ) * n * 3 );
-	// }
-	
-	// if( this.material.uniforms.time ) this.material.uniforms.time.value += this.timeInc;
-
-	// this.renderer.render( this.scene, this.camera );
+	for( var i = 0 ; i < this.icons.length ; i++ )  this.icons[i].step() || null;
 };
 
 var app = new App();
